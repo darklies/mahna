@@ -1,0 +1,10 @@
+Django>=4.2,<5.0
+psycopg2-binary>=2.9 # For PostgreSQL
+djangorestframework>=3.14 # For API development
+requests>=2.20 # For making HTTP requests to X-UI panels
+thefuzz>=0.19 # For fuzzy string matching
+python-Levenshtein>=0.12 # Optional: for faster fuzzy matching with thefuzz
+drf-spectacular>=0.26 # For API schema generation (Swagger/OpenAPI)
+# djangosimplejwt # For JWT authentication if chosen
+# python-dotenv # For managing environment variables
+# gunicorn # For production deployment
