@@ -14,18 +14,22 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+BACKEND_BASE_DIR = BASE_DIR # For SQLite path
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key' # Replace with a real secret key
+# TODO: Change this in production! You should generate a new secret key.
+# It's recommended to load this from an environment variable.
+SECRET_KEY = 'django-insecure-temp-sqlite-key-replace-this'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# For a simple setup script, we might leave DEBUG=True initially,
+# but for actual deployment, this MUST be False.
+DEBUG = True # CHANGE THIS TO FALSE FOR PRODUCTION
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # For initial setup, allow all. Restrict in production.
 
 
 # Application definition
@@ -79,12 +83,8 @@ WSGI_APPLICATION = 'project_name.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql', # Using PostgreSQL
-        'NAME': 'your_db_name', # Replace with your database name
-        'USER': 'your_db_user', # Replace with your database user
-        'PASSWORD': 'your_db_password', # Replace with your database password
-        'HOST': 'localhost', # Or your DB host
-        'PORT': '5432', # Or your DB port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BACKEND_BASE_DIR / 'db.sqlite3', # Database file will be in backend/db.sqlite3
     }
 }
 
@@ -113,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us' # Or 'fa-ir' if you plan for Persian
+LANGUAGE_CODE = 'fa-ir' # Changed to Persian
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran' # Changed to Tehran TimeZone
 
 USE_I18N = True
 
@@ -126,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BACKEND_BASE_DIR / 'staticfiles_collected' # For collectstatic
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,12 +137,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication', # If you need browser session auth
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', # Default to authenticated unless specified otherwise
+        'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', # For drf-spectacular
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # drf-spectacular settings (API Documentation)
@@ -149,7 +149,6 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'X-UI Customer Panel API',
     'DESCRIPTION': 'API documentation for the X-UI Customer Panel project. This panel serves as an intermediary between users and X-UI panels (Alireza & 3x-ui/Sanaei).',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False, # Do not serve schema directly, use UI views
-    # Optional: Postprocessing hooks, custom schema extensions, etc.
-    'COMPONENT_SPLIT_REQUEST': True, # Split request body and parameters into separate components
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
 }
