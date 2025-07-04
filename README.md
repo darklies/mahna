@@ -29,19 +29,41 @@ This project is a web-based intermediate panel between users and X-UI panels (su
 
 ### Prerequisites
 
-*   Python 3.8+
-*   Node.js and npm (or yarn) for frontend development.
-*   Git.
-*   For Debian/Ubuntu: `build-essential`, `libsqlite3-dev`.
+*   A Debian/Ubuntu based server.
+*   Root or sudo privileges.
+*   Internet connection to download the script and packages.
+*   `curl` and `git` (the script will attempt to install them if missing, but it's good to have them).
 
-### Backend Setup (`backend/`)
+### Quick Installation (Debian/Ubuntu)
 
-**Recommended Method (using installation script for Debian/Ubuntu):**
+For a fast setup of the backend on a fresh Debian/Ubuntu server, you can use the following command. This will download and execute the `install.sh` script from the repository.
 
-1.  **Download the installation script:**
-    *   Ensure you have the `install.sh` script in your project root or download it.
-2.  **Edit the script:**
-    *   Open `install.sh` and **replace `YOUR_GIT_REPO_URL_HERE`** with the actual URL of your Git repository.
+**Important:**
+*   Review the `install.sh` script from the repository if you have security concerns before running it directly.
+*   **You MUST replace `YOUR_GIT_REPO_URL_HERE` inside the `install.sh` script (if you download it manually first) OR ensure the script fetched from the URL below is correctly pointing to your desired repository for cloning.** The command below fetches and runs the script as-is from the repository.
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/YOUR_BRANCH_NAME/install.sh)
+```
+**Note:** Replace `https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/YOUR_BRANCH_NAME/install.sh` with the actual raw URL to the `install.sh` script in your repository (e.g., on your main branch).
+
+After the script finishes, it will guide you through creating a superuser. The backend will be set up with SQLite.
+
+### Detailed Backend Setup (`backend/`)
+
+If you prefer a manual setup or are using a non-Debian/Ubuntu system, follow these steps. The quick installation script automates most of these for Debian/Ubuntu.
+
+**Recommended Method (using installation script manually for Debian/Ubuntu):**
+
+1.  **Clone the repository or download `install.sh`:**
+    ```bash
+    git clone YOUR_GIT_REPO_URL_HERE xui_customer_panel
+    cd xui_customer_panel
+    # Ensure install.sh is present
+    ```
+    Or download `install.sh` manually.
+2.  **Edit the script (IMPORTANT if cloned/downloaded manually):**
+    *   Open `install.sh` and **replace `YOUR_GIT_REPO_URL_HERE`** with the actual URL of your Git repository if the script itself needs to clone (the quick install command above implies the script is already in the repo being cloned by the script).
 3.  **Make the script executable:**
     ```bash
     chmod +x install.sh
@@ -50,11 +72,11 @@ This project is a web-based intermediate panel between users and X-UI panels (su
     ```bash
     ./install.sh
     ```
-    The script will guide you through installing prerequisites, cloning the project, setting up the Python environment, installing dependencies, running database migrations (for SQLite), and creating a superuser.
+    The script will guide you through installing prerequisites, cloning the project (if configured to do so), setting up the Python environment, installing dependencies, running database migrations (for SQLite), and creating a superuser.
 
-**Manual Setup (All Systems):**
+**Manual Setup (All Systems - if not using the script):**
 
-1.  **Clone the repository (if not done by script):**
+1.  **Clone the repository (if not done already):**
     ```bash
     git clone YOUR_GIT_REPO_URL_HERE xui_customer_panel
     # Replace YOUR_GIT_REPO_URL_HERE with your repo URL
@@ -76,22 +98,19 @@ This project is a web-based intermediate panel between users and X-UI panels (su
     ```bash
     pip install -r requirements.txt
     ```
-    *(Note: `psycopg2-binary` is no longer a direct dependency as the default is SQLite. If you switch to PostgreSQL later, you'll need to install it.)*
 5.  **Review `backend/project_name/settings.py`:**
     *   The project is now configured to use SQLite (`db.sqlite3` will be created in the `backend/` directory).
-    *   Ensure `SECRET_KEY` is strong and unique if deploying (the default is for temporary use).
+    *   Ensure `SECRET_KEY` is strong and unique if deploying.
     *   For production, set `DEBUG = False` and configure `ALLOWED_HOSTS` appropriately.
 6.  **Apply database migrations:**
     ```bash
     python manage.py makemigrations panel_app
     python manage.py migrate
     ```
-    This will create the `db.sqlite3` file and set up the necessary tables.
 7.  **Create a superuser (admin account):**
     ```bash
     python manage.py createsuperuser
     ```
-    Follow the prompts.
 8.  **(Optional) Collect static files for Django Admin:**
     ```bash
     python manage.py collectstatic --noinput
@@ -100,32 +119,19 @@ This project is a web-based intermediate panel between users and X-UI panels (su
     ```bash
     python manage.py runserver 0.0.0.0:8000
     ```
-    The backend API will typically be available at `http://localhost:8000/`. For production, use Gunicorn and a web server like Nginx (see previous deployment guide).
+    For production, use Gunicorn and a web server like Nginx.
 
 ### Frontend Setup (`frontend/`)
 
-(Follow the same steps as previously mentioned for frontend setup - this part is independent of the backend's database choice)
+(Frontend setup remains the same)
 
-1.  **Navigate to the `frontend` directory:**
-    ```bash
-    cd frontend
-    ```
-2.  **Install JavaScript dependencies:**
-    ```bash
-    npm install
-    # or yarn install
-    ```
-3.  **Start the frontend development server:**
-    ```bash
-    npm start
-    # or yarn start
-    ```
-    The frontend application will typically be available at `http://localhost:3000/`.
-    It is configured in `frontend/package.json` (`"proxy": "http://localhost:8000"`) to proxy API requests to the backend.
+1.  **Navigate to the `frontend` directory:** `cd frontend`
+2.  **Install JavaScript dependencies:** `npm install` (or `yarn install`)
+3.  **Start the frontend development server:** `npm start` (or `yarn start`)
 
 ## API Documentation
 
-API documentation is auto-generated using `drf-spectacular` and can be accessed via the following endpoints when the backend server is running:
+Accessible via the following endpoints when the backend server is running:
 
 *   **Swagger UI:** `http://localhost:8000/api/v1/schema/swagger-ui/`
 *   **ReDoc:** `http://localhost:8000/api/v1/schema/redoc/`
@@ -137,43 +143,26 @@ API documentation is auto-generated using `drf-spectacular` and can be accessed 
 
 1.  Navigate to the `backend/` directory.
 2.  Ensure your virtual environment is activated.
-3.  Run tests using:
-    ```bash
-    python manage.py test panel_app
-    ```
-    To run specific test files or classes:
-    ```bash
-    python manage.py test panel_app.tests  # For tests.py in panel_app
-    python manage.py test panel_app.test_xui_clients # For test_xui_clients.py
-    ```
+3.  Run tests: `python manage.py test panel_app`
 
 ## Project Structure
 
 ```
 project_root/
-├── backend/            # Django project (now configured for SQLite)
-│   ├── manage.py
-│   ├── project_name/   # Main Django project configuration
-│   ├── panel_app/      # Our main application logic, models, views, etc.
-│   ├── venv/           # Python virtual environment (after setup)
-│   ├── db.sqlite3      # SQLite database file (after migrations)
-│   └── requirements.txt
+├── backend/            # Django project (SQLite)
 ├── frontend/           # React project
-│   ├── public/
-│   ├── src/
-│   └── package.json
-├── install.sh          # Installation script for backend (Debian/Ubuntu)
+├── install.sh          # Installation script (Debian/Ubuntu)
 ├── .gitignore
 └── README.md
 ```
 
 ## Important Notes for Production
 
-*   **Database:** While this version uses SQLite for ease of setup, for production environments with higher traffic and concurrency, migrating to a more robust database like PostgreSQL is strongly recommended.
-*   **DEBUG Mode:** Always set `DEBUG = False` in `settings.py` for production.
-*   **SECRET_KEY:** Use a unique, strong, and secret `SECRET_KEY` in `settings.py`, preferably loaded from an environment variable.
-*   **Web Server:** Use a proper WSGI server like Gunicorn and a reverse proxy like Nginx to serve the Django application in production. The Django development server (`manage.py runserver`) is not suitable for production.
-*   **HTTPS:** Secure your application with HTTPS using SSL/TLS certificates (e.g., from Let's Encrypt).
+*   **Database:** For production, PostgreSQL is recommended over SQLite.
+*   **DEBUG Mode:** Set `DEBUG = False` in `settings.py`.
+*   **SECRET_KEY:** Use a unique, strong `SECRET_KEY`.
+*   **Web Server:** Use Gunicorn and Nginx.
+*   **HTTPS:** Secure with SSL/TLS certificates.
 
 ## Contribution
 
